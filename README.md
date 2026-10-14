@@ -117,7 +117,8 @@ The tests call the controllers directly with an **in-memory database** and a **f
 ## CI/CD
 GitHub Actions (`.github/workflows/dotnet.yml`) restores, builds and runs all unit tests on every push.
 
-![Successful build](docs/ci-build.png)
+<img width="1884" height="926" alt="image" src="https://github.com/user-attachments/assets/8b1ff5dc-cded-4901-8433-e2daaa860a20" />
+
 
 ## Video
 YouTube (unlisted): **ADD YOUR LINK HERE**
