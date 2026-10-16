@@ -121,4 +121,4 @@ GitHub Actions (`.github/workflows/dotnet.yml`) restores, builds and runs all un
 
 
 ## Video
-YouTube (unlisted): **ADD YOUR LINK HERE**
+https://youtu.be/vgWhWz8_5d4?si=073sb3Ub4RvcCDmT
