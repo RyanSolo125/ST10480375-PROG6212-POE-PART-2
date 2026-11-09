@@ -1,0 +1,22 @@
+@model EventDto
+@{
+    ViewData["Title"] = "Delete " + Model.EventName;
+}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card rd-danger-card">
+            <div class="card-body p-4">
+                <h1 class="rd-page-title text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Delete event?</h1>
+                <p>You are about to delete <strong>@Model.EventName</strong> on @Ui.Date(Model.EventDate) in @Model.Location.</p>
+                <div class="alert rd-alert rd-alert-warning">
+                    This will also delete its <strong>@Model.Categories.Count categories</strong>,
+                    <strong>@Model.EnrolmentCount enrolments</strong>, all results and the banner image. This can't be undone.
+                </div>
+                <form asp-action="Delete" asp-route-id="@Model.EventId" method="post" class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash3-fill"></i> Yes, delete it</button>
+                    <a asp-action="Edit" asp-route-id="@Model.EventId" class="btn btn-outline-secondary">No, keep it</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
