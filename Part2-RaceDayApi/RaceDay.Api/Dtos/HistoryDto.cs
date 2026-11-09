@@ -25,7 +25,10 @@ public class HistoryDto
     public int? Position { get; set; }
     public string? ResultStatus { get; set; }
 
-    public static HistoryDto FromModel(Enrolment en) => new HistoryDto
+    /// <summary>How many people finished this event, e.g. 312 in "47th out of 312".</summary>
+    public int TotalFinishers { get; set; }
+
+    public static HistoryDto FromModel(Enrolment en, int totalFinishers = 0) => new HistoryDto
     {
         EnrolmentId = en.EnrolmentId,
         EventId = en.Category?.EventId ?? 0,
@@ -37,6 +40,7 @@ public class HistoryDto
         EnrolmentStatus = en.Status,
         FinishTime = en.Result?.FinishTime?.ToString(@"hh\:mm\:ss"),
         Position = en.Result?.Position,
-        ResultStatus = en.Result?.Status
+        ResultStatus = en.Result?.Status,
+        TotalFinishers = totalFinishers
     };
 }

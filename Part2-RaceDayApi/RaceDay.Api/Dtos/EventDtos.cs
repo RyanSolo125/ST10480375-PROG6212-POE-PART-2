@@ -42,6 +42,13 @@ public class EventDto
     public string EventType { get; set; } = string.Empty;
     public int OrganiserId { get; set; }
     public string OrganiserName { get; set; } = string.Empty;
+
+    /// <summary>Name of the banner image (load it from GET /api/files/{bannerFileName}).</summary>
+    public string? BannerFileName { get; set; }
+
+    /// <summary>Total number of enrolments across all categories of this event.</summary>
+    public int EnrolmentCount { get; set; }
+
     public List<CategoryDto> Categories { get; set; } = new();
 
     public static EventDto FromModel(Event e) => new EventDto
@@ -55,6 +62,8 @@ public class EventDto
         EventType = e.EventType,
         OrganiserId = e.OrganiserId,
         OrganiserName = e.Organiser?.FullName ?? "",
+        BannerFileName = e.BannerFileName,
+        EnrolmentCount = e.Categories.Sum(c => c.Enrolments.Count),
         Categories = e.Categories.Select(CategoryDto.FromModel).ToList()
     };
 }

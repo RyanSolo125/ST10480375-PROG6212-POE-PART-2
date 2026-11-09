@@ -46,9 +46,13 @@ public class ResultDto
     public string CategoryName { get; set; } = string.Empty;
     public string? FinishTime { get; set; }
     public int? Position { get; set; }
+
+    /// <summary>How many people finished this event, e.g. 312 in "47th out of 312".</summary>
+    public int TotalFinishers { get; set; }
+
     public string Status { get; set; } = string.Empty;
 
-    public static ResultDto FromModel(Result r) => new ResultDto
+    public static ResultDto FromModel(Result r, int totalFinishers = 0) => new ResultDto
     {
         ResultId = r.ResultId,
         EnrolmentId = r.EnrolmentId,
@@ -57,6 +61,7 @@ public class ResultDto
         CategoryName = r.Enrolment?.Category?.CategoryName ?? "",
         FinishTime = r.FinishTime?.ToString(@"hh\:mm\:ss"),
         Position = r.Position,
+        TotalFinishers = totalFinishers,
         Status = r.Status
     };
 }

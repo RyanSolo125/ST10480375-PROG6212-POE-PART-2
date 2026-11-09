@@ -31,6 +31,7 @@ public class CategoryDto
     public decimal DistanceKm { get; set; }
     public decimal EntryFee { get; set; }
     public int? MaxParticipants { get; set; }
+    public int EnrolmentCount { get; set; }
 
     public static CategoryDto FromModel(Category c) => new CategoryDto
     {
@@ -39,6 +40,7 @@ public class CategoryDto
         CategoryName = c.CategoryName,
         DistanceKm = c.DistanceKm,
         EntryFee = c.EntryFee,
-        MaxParticipants = c.MaxParticipants
+        MaxParticipants = c.MaxParticipants,
+        EnrolmentCount = c.Enrolments.Count
     };
 }
