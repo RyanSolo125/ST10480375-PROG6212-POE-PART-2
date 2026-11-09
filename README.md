@@ -135,7 +135,8 @@ Invalid input is caught by form validation and by the API, then shown as friendl
 - The tests use an in-memory database, a fake session and a fake file storage, so no SQL Server or Azure account is needed.
 - `.github/workflows/dotnet.yml` restores, builds the solution (API + MVC + tests), runs the unit tests and builds the MVC Docker image on every push.
 
-![Successful build](docs/ci-build-part3.png)
+![Successful build](<img width="1882" height="786" alt="image" src="https://github.com/user-attachments/assets/1339c954-1b15-418d-8394-f2b79c028f2c" />
+)
 
 ## Video
 YouTube (unlisted): **ADD YOUR LINK HERE**
