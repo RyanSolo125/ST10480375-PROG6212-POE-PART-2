@@ -1,0 +1,73 @@
+@model List<HistoryDto>
+@{
+    ViewData["Title"] = "My Results";
+    var finished = Model.Where(h => h.ResultStatus == "Finished").ToList();
+    var best = finished.Where(h => h.Position != null).OrderBy(h => h.Position).FirstOrDefault();
+}
+<div class="rd-page-header">
+    <div>
+        <h1 class="rd-page-title">My Results</h1>
+        <p class="text-muted mb-0">Your race history across all completed events.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="rd-stat"><i class="bi bi-flag-fill"></i><span class="rd-stat-value">@Model.Count</span><span class="rd-stat-label">Completed events</span></div></div>
+    <div class="col-md-4"><div class="rd-stat"><i class="bi bi-check2-all"></i><span class="rd-stat-value">@finished.Count</span><span class="rd-stat-label">Races finished</span></div></div>
+    <div class="col-md-4"><div class="rd-stat"><i class="bi bi-trophy-fill"></i><span class="rd-stat-value">@(best?.Position != null ? Ui.Ordinal(best.Position.Value) : "–")</span><span class="rd-stat-label">Best finishing position</span></div></div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="rd-empty">
+        <i class="bi bi-trophy"></i>
+        <h3>No race history yet</h3>
+        <p>Your results will appear here after the events you've entered have taken place.</p>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var h in Model)
+        {
+            <div class="col-12">
+                <div class="card rd-result-card">
+                    <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
+                        <div class="rd-result-position">
+                            @if (h.Position != null)
+                            {
+                                <span class="rd-result-place">@Ui.Ordinal(h.Position.Value)</span>
+                                <span class="rd-result-of">out of @h.TotalFinishers @(h.TotalFinishers == 1 ? "finisher" : "finishers")</span>
+                            }
+                            else if (h.ResultStatus != null)
+                            {
+                                <span class="rd-result-place">@h.ResultStatus</span>
+                            }
+                            else
+                            {
+                                <span class="rd-result-place rd-result-pending"><i class="bi bi-hourglass-split"></i></span>
+                                <span class="rd-result-of">Awaiting results</span>
+                            }
+                        </div>
+                        <div class="flex-grow-1">
+                            <a asp-controller="Events" asp-action="Details" asp-route-id="@h.EventId" class="rd-card-title d-block">@h.EventName</a>
+                            <div class="rd-meta">
+                                <span><i class="bi bi-calendar3"></i> @Ui.Date(h.EventDate)</span>
+                                <span><i class="bi bi-tag-fill"></i> @h.CategoryName</span>
+                                <span><i class="bi bi-geo-alt-fill"></i> @h.Location</span>
+                            </div>
+                        </div>
+                        <div class="text-md-end">
+                            <span class="rd-finish-label">Finish time</span>
+                            <span class="rd-finish-time">@(h.FinishTime ?? "–")</span>
+                            @if (h.ResultStatus != null)
+                            {
+                                <div class="mt-1"><partial name="_StatusBadge" model="h.ResultStatus" /></div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

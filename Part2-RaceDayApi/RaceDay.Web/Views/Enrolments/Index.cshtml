@@ -1,0 +1,66 @@
+@model List<EnrolmentDto>
+@{
+    ViewData["Title"] = "My Enrolments";
+}
+<div class="rd-page-header">
+    <div>
+        <h1 class="rd-page-title">My Enrolments</h1>
+        <p class="text-muted mb-0">Every event you've entered and its status.</p>
+    </div>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary"><i class="bi bi-search"></i> Find more events</a>
+</div>
+
+<div class="d-flex flex-wrap gap-3 mb-3 small">
+    <span><span class="rd-badge rd-badge-confirmed"><i class="bi bi-check-circle-fill"></i> Confirmed</span> organiser has confirmed your entry</span>
+    <span><span class="rd-badge rd-badge-pending"><i class="bi bi-hourglass-split"></i> Pending</span> waiting for the organiser</span>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="rd-empty">
+        <i class="bi bi-ticket-perforated"></i>
+        <h3>You haven't entered any events yet</h3>
+        <p><a asp-controller="Home" asp-action="Index">Browse upcoming events</a> to find your next race.</p>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table rd-table align-middle mb-0">
+                <thead>
+                    <tr><th>Event</th><th>Date</th><th>Category</th><th>Entered on</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var en in Model)
+                    {
+                        bool upcoming = en.EventDate.Date >= DateTime.Today;
+                        <tr class="@(upcoming ? "" : "rd-row-past")">
+                            <td>
+                                <a asp-controller="Events" asp-action="Details" asp-route-id="@en.EventId" class="fw-semibold">@en.EventName</a>
+                                <div class="small text-muted"><i class="bi bi-geo-alt"></i> @en.Location</div>
+                            </td>
+                            <td>@Ui.Date(en.EventDate)</td>
+                            <td>@en.CategoryName</td>
+                            <td>@Ui.Date(en.EnrolmentDate)</td>
+                            <td><partial name="_StatusBadge" model="en.Status" /></td>
+                            <td class="text-end">
+                                @if (upcoming && en.Status != "Cancelled")
+                                {
+                                    <form asp-action="Cancel" asp-route-id="@en.EnrolmentId" method="post"
+                                          data-confirm="Cancel your entry for @en.EventName?">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                    </form>
+                                }
+                                else if (!upcoming)
+                                {
+                                    <a asp-controller="Results" asp-action="Index" class="btn btn-sm btn-outline-secondary">Results</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
