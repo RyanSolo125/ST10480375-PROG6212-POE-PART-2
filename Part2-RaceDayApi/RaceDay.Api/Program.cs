@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using RaceDay.Api.Data;
+using RaceDay.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +20,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// 3. Azure Blob Storage for event banners and profile pictures
+builder.Services.AddSingleton<IFileStorageService, AzureBlobStorageService>();
+
 builder.Services.AddControllers();
 
-// 3. Swagger - shows every endpoint with its /// description in the browser
+// 4. Swagger - shows every endpoint with its /// description in the browser
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -60,7 +64,7 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+// No HTTPS redirect: the MVC app (also when running in Docker) calls the API over http://...:5180
 app.UseSession();   // must come before MapControllers
 
 app.MapControllers();
