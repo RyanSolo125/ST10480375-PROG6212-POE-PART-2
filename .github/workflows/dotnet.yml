@@ -1,4 +1,4 @@
-name: RaceDay API - Build and Test
+name: RaceDay - Build and Test
 
 on:
   push:
@@ -25,8 +25,16 @@ jobs:
       - name: Restore packages
         run: dotnet restore
 
-      - name: Build
+      # Builds all three projects in the solution: RaceDay.Api, RaceDay.Web (MVC) and RaceDay.Tests
+      - name: Build solution (API + MVC + tests)
         run: dotnet build --no-restore --configuration Release
+
+      - name: Build MVC project
+        run: dotnet build RaceDay.Web/RaceDay.Web.csproj --no-restore --configuration Release
 
       - name: Run unit tests
         run: dotnet test --no-build --configuration Release --verbosity normal
+
+      # Checks that the Dockerfile still builds the MVC app into an image
+      - name: Build MVC Docker image
+        run: docker build -t raceday-web ./RaceDay.Web
