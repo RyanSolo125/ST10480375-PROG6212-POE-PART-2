@@ -1,0 +1,81 @@
+@model EventResultsViewModel
+@{
+    ViewData["Title"] = "Results - " + Model.Event.EventName;
+    int captured = Model.Enrolments.Count(e => e.ResultId != null);
+}
+<partial name="_OrganiserEventNav" model="Model.Event" />
+
+@if (!Model.CanCapture)
+{
+    <div class="alert rd-alert rd-alert-warning">
+        <i class="bi bi-clock-history me-2"></i>
+        Results can be captured once the event has taken place on <strong>@Ui.Date(Model.Event.EventDate)</strong>.
+    </div>
+}
+else
+{
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <p class="mb-0 text-muted">Enter each finisher's time (hh:mm:ss) and position, then press <strong>Save</strong>. Results appear on the participant's My Results page straight away.</p>
+        <span class="rd-chip"><i class="bi bi-check2-square"></i> @captured of @Model.Enrolments.Count captured</span>
+    </div>
+}
+
+@if (!Model.Enrolments.Any())
+{
+    <div class="rd-empty">
+        <i class="bi bi-stopwatch"></i>
+        <h3>No participants to capture results for</h3>
+        <p>Once people have entered this event they'll appear here.</p>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="rd-results-head d-none d-lg-flex">
+            <span class="rd-col-name">Participant</span>
+            <span class="rd-col-time">Finish time</span>
+            <span class="rd-col-pos">Position</span>
+            <span class="rd-col-status">Status</span>
+            <span class="rd-col-save"></span>
+        </div>
+        @foreach (var en in Model.Enrolments)
+        {
+            @* One small form per participant so each row can be saved on its own *@
+            <form asp-action="Save" method="post" class="rd-results-row">
+                <input type="hidden" name="EventId" value="@Model.Event.EventId" />
+                <input type="hidden" name="EnrolmentId" value="@en.EnrolmentId" />
+                <input type="hidden" name="ResultId" value="@en.ResultId" />
+
+                <div class="rd-col-name">
+                    <span class="fw-semibold">@en.ParticipantName</span>
+                    <div class="small text-muted">@en.CategoryName &middot; <partial name="_StatusBadge" model="en.Status" /></div>
+                </div>
+                <div class="rd-col-time">
+                    <label class="form-label d-lg-none small">Finish time</label>
+                    <input type="text" name="FinishTime" value="@en.FinishTime" class="form-control font-monospace" placeholder="01:45:30"
+                           pattern="\d{1,2}:\d{2}:\d{2}" title="Use hh:mm:ss, e.g. 01:45:30" disabled="@(!Model.CanCapture)" />
+                </div>
+                <div class="rd-col-pos">
+                    <label class="form-label d-lg-none small">Position</label>
+                    <input type="number" name="Position" value="@en.Position" class="form-control" min="1" placeholder="e.g. 47" disabled="@(!Model.CanCapture)" />
+                </div>
+                <div class="rd-col-status">
+                    <label class="form-label d-lg-none small">Status</label>
+                    <select name="Status" class="form-select" disabled="@(!Model.CanCapture)">
+                        @foreach (var s in new[] { "Finished", "DNF", "DNS" })
+                        {
+                            @Ui.Option(s, s == "DNF" ? "DNF (did not finish)" : s == "DNS" ? "DNS (did not start)" : s, (en.ResultStatus ?? "Finished") == s)
+                        }
+                    </select>
+                </div>
+                <div class="rd-col-save">
+                    @if (en.ResultId != null)
+                    {
+                        <span class="rd-saved" title="Result captured"><i class="bi bi-check-circle-fill"></i></span>
+                    }
+                    <button type="submit" class="btn btn-primary" disabled="@(!Model.CanCapture)">Save</button>
+                </div>
+            </form>
+        }
+    </div>
+}

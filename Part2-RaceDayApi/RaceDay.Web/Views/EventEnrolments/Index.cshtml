@@ -1,0 +1,63 @@
+@model EventEnrolmentsViewModel
+@{
+    ViewData["Title"] = "Enrolments - " + Model.Event.EventName;
+    int confirmed = Model.Enrolments.Count(e => e.Status == "Confirmed");
+    int pending = Model.Enrolments.Count(e => e.Status == "Pending");
+    int cancelled = Model.Enrolments.Count(e => e.Status == "Cancelled");
+}
+<partial name="_OrganiserEventNav" model="Model.Event" />
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="rd-stat"><i class="bi bi-people-fill"></i><span class="rd-stat-value">@Model.Enrolments.Count</span><span class="rd-stat-label">Total</span></div></div>
+    <div class="col-6 col-md-3"><div class="rd-stat rd-stat-confirmed"><i class="bi bi-check-circle-fill"></i><span class="rd-stat-value">@confirmed</span><span class="rd-stat-label">Confirmed</span></div></div>
+    <div class="col-6 col-md-3"><div class="rd-stat rd-stat-pending"><i class="bi bi-hourglass-split"></i><span class="rd-stat-value">@pending</span><span class="rd-stat-label">Pending</span></div></div>
+    <div class="col-6 col-md-3"><div class="rd-stat rd-stat-cancelled"><i class="bi bi-x-circle-fill"></i><span class="rd-stat-value">@cancelled</span><span class="rd-stat-label">Cancelled</span></div></div>
+</div>
+
+@if (!Model.Enrolments.Any())
+{
+    <div class="rd-empty">
+        <i class="bi bi-people"></i>
+        <h3>No one has entered yet</h3>
+        <p>Participants who enter this event will appear here.</p>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table rd-table align-middle mb-0">
+                <thead>
+                    <tr><th>Participant</th><th>Category</th><th>Entered on</th><th>Status</th><th>Change status</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var en in Model.Enrolments)
+                    {
+                        <tr>
+                            <td>
+                                <span class="fw-semibold">@en.ParticipantName</span>
+                                <div class="small text-muted">@en.ParticipantEmail</div>
+                            </td>
+                            <td>@en.CategoryName</td>
+                            <td>@Ui.Date(en.EnrolmentDate)</td>
+                            <td><partial name="_StatusBadge" model="en.Status" /></td>
+                            <td>
+                                <form asp-action="UpdateStatus" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                                    <input type="hidden" name="enrolmentId" value="@en.EnrolmentId" />
+                                    <select name="status" class="form-select form-select-sm" aria-label="New status for @en.ParticipantName">
+                                        @foreach (var s in new[] { "Pending", "Confirmed", "Cancelled" })
+                                        {
+                                            @Ui.Option(s, s, en.Status == s)
+                                        }
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
