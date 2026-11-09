@@ -26,7 +26,7 @@ public class EnrolmentsControllerTests
         Assert.Equal(participant.UserId, saved.ParticipantId);   // the participant
         Assert.Equal(category.CategoryId, saved.CategoryId);     // the category
         Assert.Equal(ev.EventId, saved.Category!.EventId);       // the event
-        Assert.Equal("Confirmed", saved.Status);
+        Assert.Equal("Pending", saved.Status);           // new enrolments wait for the organiser
     }
 
     [Fact]

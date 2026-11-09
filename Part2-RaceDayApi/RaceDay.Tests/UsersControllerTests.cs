@@ -12,7 +12,7 @@ public class UsersControllerTests
     public async Task GetProfile_NotLoggedIn_Returns401()
     {
         using var db = TestHelper.CreateDb();
-        var controller = TestHelper.Setup(new UsersController(db));
+        var controller = TestHelper.Setup(new UsersController(db, new FakeFileStorage()));
 
         var result = await controller.GetProfile();
 
@@ -24,7 +24,7 @@ public class UsersControllerTests
     {
         using var db = TestHelper.CreateDb();
         var user = TestHelper.AddUser(db, Roles.Organiser, "me@test.com");
-        var controller = TestHelper.Setup(new UsersController(db), user.UserId, Roles.Organiser);
+        var controller = TestHelper.Setup(new UsersController(db, new FakeFileStorage()), user.UserId, Roles.Organiser);
 
         var result = await controller.GetProfile();
 
@@ -38,7 +38,7 @@ public class UsersControllerTests
     {
         using var db = TestHelper.CreateDb();
         var user = TestHelper.AddUser(db, Roles.Participant);
-        var controller = TestHelper.Setup(new UsersController(db), user.UserId, Roles.Participant);
+        var controller = TestHelper.Setup(new UsersController(db, new FakeFileStorage()), user.UserId, Roles.Participant);
 
         var result = await controller.UpdateProfile(new UpdateProfileDto { FullName = "Updated Name", PhoneNumber = "0820000000" });
 
@@ -59,7 +59,7 @@ public class UsersControllerTests
         var enrolment = TestHelper.AddEnrolment(db, participant.UserId, category.CategoryId);
         db.Results.Add(new Result { EnrolmentId = enrolment.EnrolmentId, FinishTime = new TimeSpan(1, 2, 3), Position = 7 });
         db.SaveChanges();
-        var controller = TestHelper.Setup(new UsersController(db), participant.UserId, Roles.Participant);
+        var controller = TestHelper.Setup(new UsersController(db, new FakeFileStorage()), participant.UserId, Roles.Participant);
 
         var result = await controller.GetHistory();
 
@@ -75,7 +75,7 @@ public class UsersControllerTests
     {
         using var db = TestHelper.CreateDb();
         var organiser = TestHelper.AddUser(db, Roles.Organiser);
-        var controller = TestHelper.Setup(new UsersController(db), organiser.UserId, Roles.Organiser);
+        var controller = TestHelper.Setup(new UsersController(db, new FakeFileStorage()), organiser.UserId, Roles.Organiser);
 
         var result = await controller.GetHistory();
 

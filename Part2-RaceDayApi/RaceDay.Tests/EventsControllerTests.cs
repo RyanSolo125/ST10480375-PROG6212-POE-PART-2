@@ -23,9 +23,9 @@ public class EventsControllerTests
         using var db = TestHelper.CreateDb();
         var organiser = TestHelper.AddUser(db, Roles.Organiser);
         TestHelper.AddEvent(db, organiser.UserId);
-        var controller = TestHelper.Setup(new EventsController(db));
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()));
 
-        var result = await controller.GetAll(null);
+        var result = await controller.GetAll(null, null, null);
 
         var ok = Assert.IsType<OkObjectResult>(result);
         var events = Assert.IsAssignableFrom<IEnumerable<EventDto>>(ok.Value!);
@@ -36,7 +36,7 @@ public class EventsControllerTests
     public async Task GetById_UnknownEvent_Returns404()
     {
         using var db = TestHelper.CreateDb();
-        var controller = TestHelper.Setup(new EventsController(db));
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()));
 
         var result = await controller.GetById(999);
 
@@ -48,7 +48,7 @@ public class EventsControllerTests
     {
         using var db = TestHelper.CreateDb();
         var organiser = TestHelper.AddUser(db, Roles.Organiser);
-        var controller = TestHelper.Setup(new EventsController(db), organiser.UserId, Roles.Organiser);
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()), organiser.UserId, Roles.Organiser);
 
         var result = await controller.Create(ValidEvent());
 
@@ -63,7 +63,7 @@ public class EventsControllerTests
     {
         using var db = TestHelper.CreateDb();
         var participant = TestHelper.AddUser(db, Roles.Participant);
-        var controller = TestHelper.Setup(new EventsController(db), participant.UserId, Roles.Participant);
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()), participant.UserId, Roles.Participant);
 
         var result = await controller.Create(ValidEvent());
 
@@ -75,7 +75,7 @@ public class EventsControllerTests
     public async Task Create_NotLoggedIn_Returns401()
     {
         using var db = TestHelper.CreateDb();
-        var controller = TestHelper.Setup(new EventsController(db));
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()));
 
         var result = await controller.Create(ValidEvent());
 
@@ -88,7 +88,7 @@ public class EventsControllerTests
     {
         using var db = TestHelper.CreateDb();
         var organiser = TestHelper.AddUser(db, Roles.Organiser);
-        var controller = TestHelper.Setup(new EventsController(db), organiser.UserId, Roles.Organiser);
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()), organiser.UserId, Roles.Organiser);
         var dto = ValidEvent();
         dto.EventType = "Swim";
 
@@ -103,7 +103,7 @@ public class EventsControllerTests
         using var db = TestHelper.CreateDb();
         var organiser = TestHelper.AddUser(db, Roles.Organiser);
         var ev = TestHelper.AddEvent(db, organiser.UserId);
-        var controller = TestHelper.Setup(new EventsController(db), organiser.UserId, Roles.Organiser);
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()), organiser.UserId, Roles.Organiser);
         var dto = ValidEvent();
         dto.EventName = "Renamed Race";
         dto.EventType = "Walk";
@@ -123,7 +123,7 @@ public class EventsControllerTests
         var owner = TestHelper.AddUser(db, Roles.Organiser);
         var otherOrganiser = TestHelper.AddUser(db, Roles.Organiser);
         var ev = TestHelper.AddEvent(db, owner.UserId);
-        var controller = TestHelper.Setup(new EventsController(db), otherOrganiser.UserId, Roles.Organiser);
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()), otherOrganiser.UserId, Roles.Organiser);
 
         var result = await controller.Update(ev.EventId, ValidEvent());
 
@@ -136,7 +136,7 @@ public class EventsControllerTests
         using var db = TestHelper.CreateDb();
         var organiser = TestHelper.AddUser(db, Roles.Organiser);
         var ev = TestHelper.AddEvent(db, organiser.UserId);
-        var controller = TestHelper.Setup(new EventsController(db), organiser.UserId, Roles.Organiser);
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()), organiser.UserId, Roles.Organiser);
 
         var result = await controller.Delete(ev.EventId);
 
@@ -151,7 +151,7 @@ public class EventsControllerTests
         var organiser = TestHelper.AddUser(db, Roles.Organiser);
         var participant = TestHelper.AddUser(db, Roles.Participant);
         var ev = TestHelper.AddEvent(db, organiser.UserId);
-        var controller = TestHelper.Setup(new EventsController(db), participant.UserId, Roles.Participant);
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()), participant.UserId, Roles.Participant);
 
         var result = await controller.Delete(ev.EventId);
 
@@ -164,7 +164,7 @@ public class EventsControllerTests
     {
         using var db = TestHelper.CreateDb();
         var organiser = TestHelper.AddUser(db, Roles.Organiser);
-        var controller = TestHelper.Setup(new EventsController(db), organiser.UserId, Roles.Organiser);
+        var controller = TestHelper.Setup(new EventsController(db, new FakeFileStorage()), organiser.UserId, Roles.Organiser);
 
         var result = await controller.Delete(999);
 
