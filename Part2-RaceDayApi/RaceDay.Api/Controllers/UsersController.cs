@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RaceDay.Api.Data;
 using RaceDay.Api.Dtos;
 using RaceDay.Api.Helpers;
+using RaceDay.Api.Services;
 
 namespace RaceDay.Api.Controllers;
 
@@ -12,10 +13,12 @@ namespace RaceDay.Api.Controllers;
 public class UsersController : BaseApiController
 {
     private readonly RaceDayDbContext _db;
+    private readonly IFileStorageService _storage;
 
-    public UsersController(RaceDayDbContext db)
+    public UsersController(RaceDayDbContext db, IFileStorageService storage)
     {
         _db = db;
+        _storage = storage;
     }
 
     /// <summary>Returns the profile of the currently logged-in user (any role).</summary>
@@ -80,6 +83,59 @@ public class UsersController : BaseApiController
             .OrderByDescending(en => en.Category!.Event!.EventDate)
             .ToListAsync();
 
-        return Ok(enrolments.Select(HistoryDto.FromModel).ToList());
+        var finisherCounts = await ResultStats.FinisherCountsAsync(_db, enrolments.Select(en => en.Category!.EventId));
+
+        var history = enrolments
+            .Select(en => HistoryDto.FromModel(en, finisherCounts.GetValueOrDefault(en.Category!.EventId)))
+            .ToList();
+
+        return Ok(history);
+    }
+
+    /// <summary>Uploads or replaces the logged-in user's profile picture (any role).</summary>
+    /// <remarks>
+    /// Send the image as multipart/form-data in a field called "file" (JPG, PNG, WEBP or GIF, max 5 MB).
+    /// The image is stored in Azure Blob Storage and can be loaded from GET /api/files/{profilePictureFileName}.
+    /// </remarks>
+    /// <response code="200">Updated profile with the new profilePictureFileName.</response>
+    /// <response code="400">No file, or the file is not an allowed image.</response>
+    /// <response code="401">You are not logged in.</response>
+    /// <response code="503">Azure Blob Storage is not configured.</response>
+    [HttpPost("profile-picture")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> UploadProfilePicture(IFormFile file)
+    {
+        var check = RequireLogin();
+        if (check != null) return check;
+
+        string? error = ImageRules.Validate(file);
+        if (error != null) return BadRequest(new { message = error });
+
+        if (!_storage.IsConfigured)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "Image storage is not available right now." });
+        }
+
+        var user = await _db.Users.FindAsync(CurrentUserId!.Value);
+        if (user == null) return NotFound(new { message = "User not found." });
+
+        string? oldPicture = user.ProfilePictureFileName;
+
+        using (var stream = file.OpenReadStream())
+        {
+            user.ProfilePictureFileName = await _storage.UploadAsync(stream, ImageRules.ContentTypeOf(file), ImageRules.ExtensionOf(file));
+        }
+        await _db.SaveChangesAsync();
+
+        if (oldPicture != null)
+        {
+            await _storage.DeleteAsync(oldPicture);
+        }
+
+        return Ok(UserDto.FromModel(user));
     }
 }
