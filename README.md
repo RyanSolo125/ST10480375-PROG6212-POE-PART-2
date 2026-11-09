@@ -1,4 +1,4 @@
-# RaceDay – Part 3 (Final)
+# RaceDay – Part 3
 
 **RaceDay** is a platform for organising and entering running, walking and cycling events.
 Part 3 brings everything together:
