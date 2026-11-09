@@ -1,0 +1,82 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<div class="rd-page-header">
+    <div>
+        <h1 class="rd-page-title">Organiser Dashboard</h1>
+        <p class="text-muted mb-0">Welcome back, @Model.OrganiserName. Here's how your events are doing.</p>
+    </div>
+    <a asp-controller="ManageEvents" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New event</a>
+</div>
+
+@if (ViewBag.LoadError != null)
+{
+    <div class="rd-empty">
+        <i class="bi bi-wifi-off"></i>
+        <h3>Your events can't be loaded right now</h3>
+        <p>@ViewBag.LoadError</p>
+    </div>
+}
+else
+{
+    @* ---------- Summary tiles ---------- *@
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3"><div class="rd-stat"><i class="bi bi-calendar-event-fill"></i><span class="rd-stat-value">@Model.TotalEvents</span><span class="rd-stat-label">Events created</span></div></div>
+        <div class="col-6 col-lg-3"><div class="rd-stat"><i class="bi bi-people-fill"></i><span class="rd-stat-value">@Model.TotalEnrolments</span><span class="rd-stat-label">Total enrolments</span></div></div>
+        <div class="col-6 col-lg-3"><div class="rd-stat"><i class="bi bi-hourglass-top"></i><span class="rd-stat-value">@Model.UpcomingCount</span><span class="rd-stat-label">Upcoming events</span></div></div>
+        <div class="col-6 col-lg-3"><div class="rd-stat rd-stat-accent"><i class="bi bi-flag-fill"></i><span class="rd-stat-value">@(Model.NextEvent != null ? Model.NextEvent.EventDate.ToString("dd MMM") : "–")</span><span class="rd-stat-label">@(Model.NextEvent?.EventName ?? "No upcoming event")</span></div></div>
+    </div>
+
+    @if (!Model.Events.Any())
+    {
+        <div class="rd-empty">
+            <i class="bi bi-calendar-plus"></i>
+            <h3>You haven't created any events yet</h3>
+            <p><a asp-controller="ManageEvents" asp-action="Create">Create your first event</a> to start taking entries.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body pb-0"><h2 class="rd-section-title">Your events</h2></div>
+            <div class="table-responsive">
+                <table class="table rd-table align-middle mb-0">
+                    <thead>
+                        <tr><th>Event</th><th>Date</th><th>Type</th><th class="text-center">Categories</th><th class="text-center">Enrolments</th><th>Status</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ev in Model.Events.OrderByDescending(e => e.IsUpcoming).ThenBy(e => e.EventDate))
+                        {
+                            <tr class="@(ev.IsUpcoming ? "" : "rd-row-past")">
+                                <td>
+                                    <span class="fw-semibold">@ev.EventName</span>
+                                    <div class="small text-muted"><i class="bi bi-geo-alt"></i> @ev.Location</div>
+                                </td>
+                                <td>@Ui.Date(ev.EventDate)</td>
+                                <td><span class="rd-type-pill rd-type-pill-inline @Ui.EventTypeClass(ev.EventType)"><i class="bi @Ui.EventTypeIcon(ev.EventType)"></i> @ev.EventType</span></td>
+                                <td class="text-center">@ev.Categories.Count</td>
+                                <td class="text-center"><span class="rd-count">@ev.EnrolmentCount</span></td>
+                                <td>
+                                    @if (ev.IsUpcoming)
+                                    {
+                                        <span class="rd-badge rd-badge-upcoming"><i class="bi bi-hourglass-top"></i> Upcoming</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="rd-badge rd-badge-neutral"><i class="bi bi-flag-fill"></i> Completed</span>
+                                    }
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    <a asp-controller="EventEnrolments" asp-action="Index" asp-route-eventId="@ev.EventId" class="btn btn-sm btn-outline-primary" title="Enrolments"><i class="bi bi-people"></i></a>
+                                    <a asp-controller="EventResults" asp-action="Index" asp-route-eventId="@ev.EventId" class="btn btn-sm btn-outline-primary" title="Results"><i class="bi bi-stopwatch"></i></a>
+                                    <a asp-controller="ManageEvents" asp-action="Edit" asp-route-id="@ev.EventId" class="btn btn-sm btn-primary" title="Manage"><i class="bi bi-pencil-square"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
