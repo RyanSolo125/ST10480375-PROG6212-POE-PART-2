@@ -25,11 +25,15 @@ public class EnrolmentsController : BaseApiController
         return _db.Enrolments
             .Include(en => en.Participant)
             .Include(en => en.Category)
-                .ThenInclude(c => c!.Event);
+                .ThenInclude(c => c!.Event)
+            .Include(en => en.Result);
     }
 
     /// <summary>Enrols the logged-in participant into a category of an event (Participants only).</summary>
-    /// <remarks>Records the link between the participant, the event and the selected category.</remarks>
+    /// <remarks>
+    /// Records the link between the participant, the event and the selected category straight away.
+    /// New enrolments start as "Pending" until the organiser confirms them.
+    /// </remarks>
     /// <response code="201">New enrolment object.</response>
     /// <response code="400">Category full, or the event has already taken place.</response>
     /// <response code="401">You are not logged in.</response>
@@ -84,7 +88,7 @@ public class EnrolmentsController : BaseApiController
         {
             ParticipantId = participantId,
             CategoryId = category.CategoryId,
-            Status = "Confirmed"
+            Status = EnrolmentStatuses.Pending
         };
 
         _db.Enrolments.Add(enrolment);
@@ -142,6 +146,44 @@ public class EnrolmentsController : BaseApiController
             .ToListAsync();
 
         return Ok(enrolments.Select(EnrolmentDto.FromModel).ToList());
+    }
+
+    /// <summary>Changes the status of an enrolment on one of your events (Organisers only).</summary>
+    /// <remarks>Status must be Pending, Confirmed or Cancelled.</remarks>
+    /// <response code="200">Updated enrolment object.</response>
+    /// <response code="400">Invalid status.</response>
+    /// <response code="401">You are not logged in.</response>
+    /// <response code="403">You are not an Organiser, or this is not your event.</response>
+    /// <response code="404">No enrolment with that ID.</response>
+    [HttpPut("{id}/status")]
+    [ProducesResponseType(typeof(EnrolmentDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateStatus(int id, EnrolmentStatusDto dto)
+    {
+        var check = RequireRole(Roles.Organiser);
+        if (check != null) return check;
+
+        string? status = EnrolmentStatuses.Normalise(dto.Status);
+        if (status == null)
+        {
+            return BadRequest(new { message = "Status must be Pending, Confirmed or Cancelled." });
+        }
+
+        var enrolment = await EnrolmentsWithDetails().FirstOrDefaultAsync(en => en.EnrolmentId == id);
+        if (enrolment == null) return NotFound(new { message = "Enrolment not found." });
+
+        if (enrolment.Category!.Event!.OrganiserId != CurrentUserId)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = "You can only manage enrolments for your own events." });
+        }
+
+        enrolment.Status = status;
+        await _db.SaveChangesAsync();
+
+        return Ok(EnrolmentDto.FromModel(enrolment));
     }
 
     /// <summary>Cancels the logged-in participant's own enrolment (Participants only).</summary>
