@@ -101,7 +101,8 @@ public class ResultsController : BaseApiController
         await _db.SaveChangesAsync();
 
         var saved = await ResultsWithDetails().FirstAsync(r => r.ResultId == result.ResultId);
-        return StatusCode(StatusCodes.Status201Created, ResultDto.FromModel(saved));
+        var counts = await ResultStats.FinisherCountsAsync(_db, new[] { ev.EventId });
+        return StatusCode(StatusCodes.Status201Created, ResultDto.FromModel(saved, counts.GetValueOrDefault(ev.EventId)));
     }
 
     /// <summary>Updates a previously captured result, e.g. correcting a time (Organisers only).</summary>
@@ -139,7 +140,9 @@ public class ResultsController : BaseApiController
         result.Status = dto.Status;
         await _db.SaveChangesAsync();
 
-        return Ok(ResultDto.FromModel(result));
+        int eventId = result.Enrolment!.Category!.EventId;
+        var counts = await ResultStats.FinisherCountsAsync(_db, new[] { eventId });
+        return Ok(ResultDto.FromModel(result, counts.GetValueOrDefault(eventId)));
     }
 
     /// <summary>Returns the logged-in participant's own result history (Participants only).</summary>
@@ -159,7 +162,11 @@ public class ResultsController : BaseApiController
             .Where(r => r.Enrolment!.ParticipantId == CurrentUserId)
             .ToListAsync();
 
-        return Ok(results.Select(ResultDto.FromModel).ToList());
+        var counts = await ResultStats.FinisherCountsAsync(_db, results.Select(r => r.Enrolment!.Category!.EventId));
+
+        return Ok(results
+            .Select(r => ResultDto.FromModel(r, counts.GetValueOrDefault(r.Enrolment!.Category!.EventId)))
+            .ToList());
     }
 
     /// <summary>Returns the full results/leaderboard for an event, ordered by position (public).</summary>
@@ -175,9 +182,11 @@ public class ResultsController : BaseApiController
 
         var results = await ResultsWithDetails()
             .Where(r => r.Enrolment!.Category!.EventId == eventId)
-            .OrderBy(r => r.Position)
+            .OrderBy(r => r.Position == null)   // finishers with a position first, DNF/DNS last
+            .ThenBy(r => r.Position)
             .ToListAsync();
 
-        return Ok(results.Select(ResultDto.FromModel).ToList());
+        int finishers = results.Count(r => r.Status == "Finished");
+        return Ok(results.Select(r => ResultDto.FromModel(r, finishers)).ToList());
     }
 }
