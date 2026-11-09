@@ -27,6 +27,10 @@ public class Event
     [Required, MaxLength(50)]
     public string EventType { get; set; } = "Run"; // Run, Walk or Cycle
 
+    /// <summary>Name of the banner image stored in Azure Blob Storage (null if no banner).</summary>
+    [MaxLength(255)]
+    public string? BannerFileName { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public List<Category> Categories { get; set; } = new();
