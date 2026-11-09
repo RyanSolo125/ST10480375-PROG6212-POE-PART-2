@@ -1,0 +1,77 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Sign up";
+}
+<div class="row justify-content-center">
+    <div class="col-md-9 col-lg-7">
+        <div class="card rd-auth-card">
+            <div class="rd-auth-header">
+                <i class="bi bi-person-plus-fill"></i>
+                <h1 class="rd-page-title mb-0">Join RaceDay</h1>
+                <p class="mb-0">Enter races or organise your own.</p>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Register" method="post" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert rd-alert rd-alert-error" role="alert"></div>
+
+                    @* Role choice: Participant or Organiser *@
+                    <label class="form-label">@Html.DisplayNameFor(m => m.Role)</label>
+                    <div class="row g-3 mb-1">
+                        <div class="col-sm-6">
+                            <input type="radio" class="btn-check" asp-for="Role" value="Participant" id="roleParticipant" />
+                            <label class="rd-role-option" for="roleParticipant">
+                                <i class="bi bi-person-running"></i>
+                                <strong>Participant</strong>
+                                <span>I want to enter races</span>
+                            </label>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="radio" class="btn-check" asp-for="Role" value="Organiser" id="roleOrganiser" />
+                            <label class="rd-role-option" for="roleOrganiser">
+                                <i class="bi bi-megaphone-fill"></i>
+                                <strong>Organiser</strong>
+                                <span>I want to host races</span>
+                            </label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Role" class="text-danger small d-block mb-3"></span>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label"></label>
+                            <input asp-for="FullName" class="form-control" autocomplete="name" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label"></label> <span class="text-muted small">(optional)</span>
+                            <input asp-for="PhoneNumber" class="form-control" autocomplete="tel" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" autocomplete="email" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmPassword" class="form-label"></label>
+                            <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">Create account</button>
+                </form>
+                <p class="text-center mt-3 mb-0">Already have an account? <a asp-action="Login">Log in</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
