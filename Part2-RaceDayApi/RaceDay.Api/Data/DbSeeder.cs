@@ -35,10 +35,10 @@ public static class DbSeeder
         var full42 = new Category { Event = soweto, CategoryName = "Full Marathon 42.2km", DistanceKm = 42.2m, EntryFee = 500, MaxParticipants = 6000 };
 
         // Enrolments
-        var en1 = new Enrolment { Participant = amahle, Category = ride109 };
-        var en2 = new Enrolment { Participant = amahle, Category = half21 };
-        var en3 = new Enrolment { Participant = johan, Category = ride56 };
-        var en4 = new Enrolment { Participant = johan, Category = fun10 };
+        var en1 = new Enrolment { Participant = amahle, Category = ride109, Status = "Confirmed" };
+        var en2 = new Enrolment { Participant = amahle, Category = half21, Status = "Confirmed" };
+        var en3 = new Enrolment { Participant = johan, Category = ride56, Status = "Confirmed" };
+        var en4 = new Enrolment { Participant = johan, Category = fun10, Status = "Pending" };
 
         // Results
         var r1 = new Result { Enrolment = en1, FinishTime = new TimeSpan(4, 12, 35), Position = 1245 };

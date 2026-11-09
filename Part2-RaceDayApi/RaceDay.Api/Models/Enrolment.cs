@@ -15,7 +15,7 @@ public class Enrolment
     public DateTime EnrolmentDate { get; set; } = DateTime.Now;
 
     [MaxLength(20)]
-    public string Status { get; set; } = "Confirmed";
+    public string Status { get; set; } = "Pending"; // Pending, Confirmed or Cancelled
 
     public Result? Result { get; set; }
     public Payment? Payment { get; set; }
