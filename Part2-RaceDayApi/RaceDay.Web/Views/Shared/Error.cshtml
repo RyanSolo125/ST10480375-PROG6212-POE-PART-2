@@ -1,0 +1,10 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = Model?.Title ?? "Error";
+}
+<div class="rd-empty rd-empty-page">
+    <span class="rd-error-code">@(Model?.StatusCode ?? 500)</span>
+    <h1 class="rd-page-title">@(Model?.Title ?? "Something went wrong")</h1>
+    <p>@(Model?.Message ?? "Please try again in a moment.")</p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-2">Back to events</a>
+</div>

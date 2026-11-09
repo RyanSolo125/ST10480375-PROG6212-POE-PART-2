@@ -1,0 +1,24 @@
+@model EventDto
+<div class="col-sm-6 col-lg-4">
+    <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId" class="rd-event-card card h-100 text-decoration-none">
+        <div class="rd-event-card-banner">
+            <partial name="_EventBanner" model="Model" />
+            <span class="rd-type-pill @Ui.EventTypeClass(Model.EventType)"><i class="bi @Ui.EventTypeIcon(Model.EventType)"></i> @Model.EventType</span>
+            <div class="rd-date-chip">
+                <span class="rd-date-day">@Model.EventDate.ToString("dd")</span>
+                <span class="rd-date-month">@Model.EventDate.ToString("MMM")</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <h3 class="rd-card-title">@Model.EventName</h3>
+            <p class="rd-meta mb-2"><i class="bi bi-geo-alt-fill"></i> @Model.Location</p>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="rd-chip"><i class="bi bi-signpost-2-fill"></i> @Ui.Distance(Model.DistanceKm)</span>
+                <span class="rd-chip"><i class="bi bi-tags-fill"></i> @Model.Categories.Count @(Model.Categories.Count == 1 ? "category" : "categories")</span>
+            </div>
+        </div>
+        <div class="card-footer rd-card-footer">
+            View event <i class="bi bi-arrow-right"></i>
+        </div>
+    </a>
+</div>

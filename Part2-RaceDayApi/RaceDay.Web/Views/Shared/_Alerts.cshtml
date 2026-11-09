@@ -1,0 +1,22 @@
+@* Success / warning / error messages set by the controllers with ShowSuccess() and ShowError() *@
+@if (TempData["Success"] is string success)
+{
+    <div class="alert rd-alert rd-alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@success
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Warning"] is string warning)
+{
+    <div class="alert rd-alert rd-alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@warning
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert rd-alert rd-alert-error alert-dismissible fade show" role="alert">
+        <i class="bi bi-x-octagon-fill me-2"></i>@error
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}

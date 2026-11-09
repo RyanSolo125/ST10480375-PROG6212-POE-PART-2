@@ -1,0 +1,27 @@
+@* Tabs shown on every "manage one event" page so the organiser can jump between them *@
+@model EventDto
+@{
+    var current = ViewContext.RouteData.Values["controller"]?.ToString();
+    Func<string, string> active = name => current == name ? "active" : "";
+}
+<div class="rd-manage-header">
+    <div class="d-flex align-items-center gap-3">
+        <div class="rd-manage-thumb"><partial name="_EventBanner" model="Model" /></div>
+        <div>
+            <a asp-controller="ManageEvents" asp-action="Index" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> My events</a>
+            <h1 class="rd-page-title mb-0">@Model.EventName</h1>
+            <div class="rd-meta">
+                <span><i class="bi bi-calendar3"></i> @Ui.Date(Model.EventDate)</span>
+                <span><i class="bi bi-geo-alt-fill"></i> @Model.Location</span>
+                <span class="rd-type-pill rd-type-pill-inline @Ui.EventTypeClass(Model.EventType)"><i class="bi @Ui.EventTypeIcon(Model.EventType)"></i> @Model.EventType</span>
+            </div>
+        </div>
+    </div>
+    <ul class="nav nav-pills rd-pills mt-3">
+        <li class="nav-item"><a class="nav-link @active("ManageEvents")" asp-controller="ManageEvents" asp-action="Edit" asp-route-id="@Model.EventId"><i class="bi bi-pencil-square"></i> Details</a></li>
+        <li class="nav-item"><a class="nav-link @active("Categories")" asp-controller="Categories" asp-action="Index" asp-route-eventId="@Model.EventId"><i class="bi bi-tags"></i> Categories</a></li>
+        <li class="nav-item"><a class="nav-link @active("EventEnrolments")" asp-controller="EventEnrolments" asp-action="Index" asp-route-eventId="@Model.EventId"><i class="bi bi-people"></i> Enrolments <span class="badge rounded-pill text-bg-light">@Model.EnrolmentCount</span></a></li>
+        <li class="nav-item"><a class="nav-link @active("EventResults")" asp-controller="EventResults" asp-action="Index" asp-route-eventId="@Model.EventId"><i class="bi bi-stopwatch"></i> Results</a></li>
+        <li class="nav-item"><a class="nav-link" asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId"><i class="bi bi-eye"></i> Public page</a></li>
+    </ul>
+</div>

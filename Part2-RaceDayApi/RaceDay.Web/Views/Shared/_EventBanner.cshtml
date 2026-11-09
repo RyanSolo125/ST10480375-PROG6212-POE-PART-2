@@ -1,0 +1,12 @@
+@* Event banner image from Azure (through the API), or a coloured placeholder with the event type icon *@
+@model EventDto
+@if (Model.BannerFileName != null)
+{
+    <img src="@Ui.ImageUrl(Model.BannerFileName)" alt="@Model.EventName banner" class="rd-banner-img" />
+}
+else
+{
+    <div class="rd-banner-placeholder @Ui.EventTypeClass(Model.EventType)">
+        <i class="bi @Ui.EventTypeIcon(Model.EventType)"></i>
+    </div>
+}
